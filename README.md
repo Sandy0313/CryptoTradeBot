@@ -1,1 +1,1 @@
-# CryptoTradeBot
+CryptoTradeBot is a backend application designed to automate and manage cryptocurrency trades. It leverages Flask for server functionalities and SQLAlchemy for database interactions. The application supports JSON parsing through middleware, simplifying data handling. Essential routes for managing trades are readily available and easily extendable. Set up to listen on a designated port, CryptoTradeBot provides a robust platform for developing sophisticated crypto trading strategies.
