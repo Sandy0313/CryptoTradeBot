@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 import os
 
@@ -28,26 +29,57 @@ class Trade(db.Model):
 
 @app.before_request
 def before_request():
-    if request.is_json:
-        request.data = request.get_json()
+    if not request.is_json:
+        return make_response(jsonify({"error": "Bad request, JSON required"}), 400)
+    request.data = request.get_json()
+
+@app.errorhandler(400)
+def handle_bad_request(error):
+    return jsonify({"error": "Bad request"}), 400
+
+@app.errorhandler(500)
+def handle_internal_error(error):
+    return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/trades', methods=['POST'])
 def add_trade():
-    data = request.data
-    trade = Trade(symbol=data['symbol'], volume=data['volume'], price=data['price'])
-    db.session.add(trade)
-    db.session.commit()
-    
+    try:
+        data = request.data
+        if not all(field in data for field in ['symbol', 'volume', 'price']):
+            return jsonify({"error": "Missing field(s). Required: [symbol, volume, price]"}), 400
+        
+        trade = Trade(symbol=data['symbol'], volume=data['volume'], price=data['price'])
+        db.session.add(trade)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        app.logger.error(f"Database error occurred: {str(e)}")
+        return jsonify({"error": "Failed to add trade, database error"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error occurred: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
     return jsonify(trade.to_json()), 201
 
 @app.route('/trades', methods=['GET'])
 def get_trades():
-    trades = Trade.query.all()
+    try:
+        trades = Trade.query.all()
+    except SQLAlchemyError as e:
+        app.logger.error(f"Database error occurred: {str(e)}")
+        return jsonify({"error": "Failed to fetch trades, database error"}), 500
     return jsonify([trade.to_json() for trade in trades]), 200
 
 @app.route('/trades/<int:id>', methods=['GET'])
 def get_trade(id):
-    trade = Trade.query.get_or_404(id)
+    try:
+        trade = Trade.query.get_or_404(id)
+    except SQLAlchemyError as e:
+        app.logger.error(f"Database error occurred: {str(e)}")
+        return jsonify({"error": "Failed to fetch trade, database error"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error occurred while fetching trade with id {id}: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
     return jsonify(trade.to_json()), 200
 
 if __name__ == "__main__":
