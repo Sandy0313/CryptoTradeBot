@@ -1,5 +1,7 @@
 from flask import Flask, Blueprint, request, jsonify
-from your_trade_controller import create_trade, update_trade, delete_trade, get_trade, get_all_trades
+from your_trade_controller import (
+    create_trade, update_trade, delete_trade, get_trade, get_all_trades
+)
 
 trade_ops = Blueprint('trade_ops', __name__)
 
@@ -20,10 +22,12 @@ def delete_trade_route(trade_id):
     result = delete_trade(trade_id)
     return jsonify(result), 204
 
+
 @trade_ops.route('/trades/<int:trade_id>', methods=['GET'])
 def get_trade_route(trade_id):
     result = get_trade(trade_id)
     return jsonify(result)
+
 
 @trade_ops.route('/trades', methods=['GET'])
 def get_all_trades_route():
@@ -35,4 +39,7 @@ app.register_blueprint(trade_ops, url_prefix='/api')
 
 if __name__ == '__main__':
     from os import environ
-    app.run(host=environ.get('HOST', '127.0.0.1'), port=environ.get('PORT', 5000))
+    app.run(
+        host=environ.get('HOST', '127.0.0.1'), 
+        port=environ.get('PORT', 5000)
+    )
