@@ -4,22 +4,28 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
-Base = declarative_base()
+# Base class for SQLAlchemy models
+BaseModel = declarative_base()
 
-class Trade(Base):
+class TradeRecord(BaseModel):
     __tablename__ = 'trades'
     
-    trade_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     symbol = Column(String)
     quantity = Column(Integer)
     price = Column(Float)
     timestamp = Column(DateTime)
 
-engine = create_engine(os.getenv('DATABASE_URL')) 
+# Initialize database connection
+database_url = os.getenv('DATABASE_URL') 
+engine = create_engine(database_url)
 
-Base.metadata.create_all(engine)
+# Create database tables based on models
+BaseModel.metadata.create_all(engine)
 
-Session = sessionmaker(bind=engine)
-session = Session()
+# Set up session factory for database transactions
+DatabaseSession = sessionmaker(bind=engine)
+db_session = DatabaseSession()
