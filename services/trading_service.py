@@ -8,49 +8,49 @@ API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 BASE_URL = os.getenv("BASE_URL", "https://api.exchange.com")
 
-class Trade:
-    def __init__(self, symbol, trade_type, amount):
-        self.symbol = symbol
-        self.trade_type = trade_type
-        self.amount = amount
+class TradeOrder:
+    def __init__(self, asset_pair, buy_or_sell, quantity):
+        self.asset_pair = asset_pair
+        self.buy_or_sell = buy_or_sell
+        self.quantity = quantity
 
-def place_order(trade):
-    endpoint = f"{BASE_URL}/order"
-    payload = {
-        "symbol": trade.symbol,
-        "side": trade.trade_type,
+def submit_trade_order(trade_order):
+    order_endpoint = f"{BASE_URL}/order"
+    order_payload = {
+        "symbol": trade_order.asset_pair,
+        "side": trade_order.buy_or_sell,
         "type": "market",
-        "quantity": trade.amount,
+        "quantity": trade_order.quantity,
     }
-    headers = {"X-API-KEY": API_KEY}
+    order_headers = {"X-API-KEY": API_KEY}
     
     try:
-        response = requests.post(endpoint, json=payload, headers=headers)
+        response = requests.post(order_endpoint, json=order_payload, headers=order_headers)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.HTTPError as err:
-        print(f"HTTP error occurred: {err}")
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
     except Exception as err:
-        print(f"An error occurred: {err}")
+        print(f"An unexpected error occurred: {err}")
 
-def check_balance():
-    endpoint = f"{BASE_URL}/balance"
-    headers = {"X-API-KEY": API_KEY}
+def retrieve_account_balance():
+    balance_endpoint = f"{BASE_URL}/balance"
+    balance_headers = {"X-API-KEY": API_KEY}
     
     try:
-        response = requests.get(endpoint, headers=headers)
+        response = requests.get(balance_endpoint, headers=balance_headers)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.HTTPError as err:
-        print(f"HTTP error occurred: {err}")
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
     except Exception as err:
-        print(f"An error occurred: {err}")
+        print(f"An unexpected error occurred: {err}")
 
-def trade_logic():
-    balance_info = check_balance()
-    if balance_info and balance_info.get('USD', 0) > 1000:
-        trade = Trade("BTCUSD", "buy", 0.01)
-        place_order(trade)
+def exchange_logic():
+    current_balance = retrieve_account_balance()
+    if current_balance and current_balance.get('USD', 0) > 1000:
+        new_trade_order = TradeOrder("BTCUSD", "buy", 0.01)
+        submit_trade_order(new_trade_order)
 
 if __name__ == "__main__":
-    trade_logic()
+    exchange_logic()
