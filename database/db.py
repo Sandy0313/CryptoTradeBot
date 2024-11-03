@@ -3,27 +3,30 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Retrieve DATABASE_URL from the environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
+class DatabaseConfig:
+    
+    def __init__(self):
+        self.DATABASE_URL = self.get_database_url()
+        self.engine = self.create_engine_instance()
+        self.SessionLocal = self.create_session_factory()
 
-# Create a SQL Alchemy engine instance
-engine = create_engine(DATABASE_URL)
+    @staticmethod
+    def get_database_url():
+        return os.getenv("DATABASE_URL")
 
-# Create a session factory bound to this engine
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    def create_engine_instance(self):
+        return create_engine(self.DATABASE_URL)
+
+    def create_session_factory(self):
+        return sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+
+
+database_config = DatabaseConfig()
 
 def get_db():
-    """Generator yielding a database session.
-
-    Yields:
-        db (Session): The SQLAlchemy session object.
-
-    Ensures that the session is closed after use.
-    """
-    db = SessionLocal()
+    db = database_config.SessionLocal()
     try:
         yield db
     finally:
