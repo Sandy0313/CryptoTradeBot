@@ -5,29 +5,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class DatabaseConfig:
+class DatabaseManager:
     
     def __init__(self):
-        self.DATABASE_URL = self.get_database_url()
-        self.engine = self.create_engine_instance()
-        self.SessionLocal = self.create_session_factory()
+        self.database_url = self._fetch_database_url()
+        self.engine = self._initialize_engine()
+        self.session_factory = self._configure_session_factory()
 
     @staticmethod
-    def get_database_url():
+    def _fetch_database_url():
         return os.getenv("DATABASE_URL")
 
-    def create_engine_instance(self):
-        return create_engine(self.DATABASE_URL)
+    def _initialize_engine(self):
+        return create_engine(self.database_url)
 
-    def create_session_factory(self):
+    def _configure_session_factory(self):
         return sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
 
-database_config = DatabaseConfig()
+database_manager = DatabaseManager()
 
-def get_db():
-    db = database_config.SessionLocal()
+def establish_db_session():
+    db_session = database_manager.session_factory()
     try:
-        yield db
+        yield db_session
     finally:
-        db.close()
+        db_session.close()
