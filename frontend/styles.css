@@ -1,0 +1,64 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background-color: #007BFF;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+.trade-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trade-form input,
+.trade-form button {
+  padding: 10px;
+  margin: 5px 0;
+}
+
+.trade-list {
+  margin: 20px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.trade-list th,
+.trade-list td {
+  text-align: left;
+  padding: 8px;
+}
+
+.trade-list th {
+  background-color: #007BFF;
+  color: white;
+}
+
+.trade-list tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.trade-details {
+  padding: 20px;
+  margin: 20px;
+  border: 1px solid #ddd;
+}
+
+@media screen and (max-width: 768px) {
+  .trade-form, .trade-list, .trade-details {
+    width: 100%;
+    margin: 10px;
+    padding: 10px;
+  }
+
+  header {
+    padding: 10px;
+  }
+}
