@@ -14,7 +14,7 @@ const fetchTrades = async () => {
     const response = await axios.get(`${API_URL}/trades`);
     displayTrades(response.data);
   } catch (error) {
-    console.error("Error fetching trades:", error);
+    handleError(error, "Error fetching trades:");
   }
 };
 
@@ -24,7 +24,7 @@ const createTrade = async (trade: Trade) => {
     console.log('Trade created:', response.data);
     fetchTrades();
   } catch (error) {
-    console.error("Error creating trade:", error);
+    handleError(error, "Error creating trade:");
   }
 };
 
@@ -34,7 +34,7 @@ const updateTrade = async (id: number, trade: Trade) => {
     console.log('Trade updated:', response.data);
     fetchTrades();
   } catch (error) {
-    console.error("Error updating trade:", error);
+    handleError(error, "Error updating trade:");
   }
 };
 
@@ -44,7 +44,7 @@ const deleteTrade = async (id: number) => {
     console.log('Trade deleted');
     fetchTrades();
   } catch (error) {
-    console.error("Error deleting trade:", error);
+    handleError(error, "Error deleting trade:");
   }
 };
 
@@ -79,3 +79,16 @@ const init = () => {
 };
   
 document.addEventListener('DOMContentLoaded', init);
+
+const handleError = (error: any, message: string) => {
+  if (error.response) {
+    console.error(`${message} Response data:`, error.response.data);
+    console.error(`${message} Response status:`, error.response.status);
+  } else if (error.request) {
+    console.error(`${message} No response:`, error.request);
+  } else {
+    console.error(`${message} Setup error:`, error.message);
+  }
+
+  alert(`Failed to perform operation. ${message}`);
+};
